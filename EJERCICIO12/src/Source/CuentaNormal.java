@@ -1,0 +1,62 @@
+package Source;
+
+import java.time.LocalDate;
+
+class CuentaNormal extends Cuenta {
+    private double limiteGiroEnDescubierto;
+    private LocalDate fechaInversion;
+    private Inversion inversion;
+
+    public CuentaNormal(double saldoInicial, double limiteGiroEnDescubierto) {
+        super(saldoInicial);
+        this.limiteGiroEnDescubierto = limiteGiroEnDescubierto;
+        this.fechaInversion = null;
+        this.inversion = null;
+    }
+
+    public void preCancelarInversion() {
+        if (inversion != null && inversion.getMontoInvertido() > 0) {
+            inversion.cancelarInversion();
+        }
+    }
+
+    public void realizarInversion(double monto, int dias) {
+        if (inversion == null || inversion.getMontoInvertido() == 0) {
+            fechaInversion = LocalDate.now();
+            inversion = new Inversion(monto, dias);
+        } else {
+            System.out.println("Ya tienes una inversión en curso.");
+        }
+    }
+
+    public double getLimiteGiroEnDescubierto() {
+        return limiteGiroEnDescubierto;
+    }
+
+    public double getMontoDisponible() {
+        double montoDisponible = saldo + limiteGiroEnDescubierto;
+        if (inversion != null) {
+            double interes = inversion.calcularInteres();
+            montoDisponible += interes;
+
+            if (interes > 0 && !inversion.estaCancelada()) {
+                return montoDisponible;
+            }
+        }
+        return montoDisponible;
+    }
+
+    public double getMontoInvertido() {
+        if (inversion != null) {
+            return inversion.getMontoInvertido();
+        }
+        return 0;
+    }
+
+    public double calcularInteresInversion() {
+        if (inversion != null) {
+            return inversion.calcularInteres();
+        }
+        return 0;
+    }
+}
